@@ -240,9 +240,3 @@ Key 只在本机使用，不会被提交进任何生成的文件或页面。
 **支持搜书、阅读时长统计、书评这些功能吗？**
 不支持,这个项目只固化了 `init` / `read` 这两条日常流程。更开放式的查询建议配合官方的
 [weread-skills](https://weread.qq.com/r/weread-skills)（`npx skills add Tencent/WeChatReading -g`）使用。
-
-## License
-
-> 在这里补充你想用的开源许可证，例如 MIT。可以运行
-> `curl -s https://api.github.com/licenses/mit | grep body | ...`（或者直接从
-> [choosealicense.com](https://choosealicense.com/) 复制）生成 `LICENSE` 文件。
