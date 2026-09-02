@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>我的书架 · 微信读书</title>
+<style>
+/* ===========================================================
+   设计口径（改样式只动这个模板，改完必须重跑生成脚本）
+   - 品牌色沿用：墨绿 #1a7f4b + 金 #c8952c，浅底 #f6f7f5
+   - 一套圆角尺度：卡片 14px / 控件 10px / 小标签 6px
+   - 文字色全部过 WCAG AA（正文 4.5:1 起）
+   - 图表色只做数据编码，不做装饰
+   - 深浅色双模式，跟随系统 prefers-color-scheme
+   =========================================================== */
+:root{
+  --bg:#f6f7f5;
+  --bg-2:#eef1ef;
+  --card:#ffffff;
+  --ink:#1b1f1d;
+  --ink-2:#49554e;
+  --ink-3:#63716b;
+  --line:#e3e8e5;
+  --line-2:#eff2f0;
+
+  --brand:#1a7f4b;
+  --brand-ink:#136c3f;
+  --brand-soft:#e8f3ed;
+  --on-brand:#ffffff;
+
+  /* 四种阅读状态：填充色用于图表，-ink 用于文字 */
+  --c-fin:#c8952c;      --c-fin-ink:#8a6413;
+  --c-read:#1a7f4b;     --c-read-ink:#136c3f;
+  --c-skim:#7d94a3;     --c-skim-ink:#4f6674;
+  --c-un:#c2cac6;       --c-un-ink:#63716b;
+
+  --fin-soft:#fbf3e2;
+  --badge-fin:rgba(125,90,16,.94);   --badge-fin-ink:#ffffff;
+  --badge-sec:rgba(60,72,66,.86);    --badge-sec-ink:#ffffff;
+
+  --hd-1:#1a7f4b;  --hd-2:#14643c;
+
+  --shadow:0 1px 2px rgba(20,40,30,.04),0 4px 16px rgba(20,40,30,.05);
+  --shadow-lg:0 4px 12px rgba(20,40,30,.08),0 12px 40px rgba(20,40,30,.10);
+
+  --r-card:14px;
+  --r-ctl:10px;
+  --r-tag:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#121614;
+    --bg-2:#171c19;
+    --card:#1b211e;
+    --ink:#e9eeeb;
+    --ink-2:#a8b5ae;
+    --ink-3:#8b978f;
+    --line:#2b332e;
+    --line-2:#232a26;
+
+    --brand:#25a163;
+    --brand-ink:#58c48c;
+    --brand-soft:#17301f;
+    --on-brand:#0f1311;
+
+    --c-fin:#d9a441;      --c-fin-ink:#e0ab4c;
+    --c-read:#2fa267;     --c-read-ink:#58c48c;
+    --c-skim:#7794a6;     --c-skim-ink:#8fb0c2;
+    --c-un:#47514c;       --c-un-ink:#8b978f;
+
+    --fin-soft:#2e2412;
+    --badge-fin:rgba(217,164,65,.95);  --badge-fin-ink:#14100a;
+    --badge-sec:rgba(233,238,235,.88); --badge-sec-ink:#141815;
+
+    --hd-1:#14432a;  --hd-2:#0d2b1b;
+
+    --shadow:0 1px 2px rgba(0,0,0,.30),0 4px 16px rgba(0,0,0,.28);
+    --shadow-lg:0 4px 12px rgba(0,0,0,.38),0 12px 40px rgba(0,0,0,.44);
+  }
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.6;
+  padding:0 0 80px;
+}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+:where(button,select,input,a,[tabindex]):focus-visible{
+  outline:2px solid var(--brand-ink);outline-offset:2px;border-radius:var(--r-ctl);
+}
+
+/* ---------- Header ---------- */
+header{
+  background:linear-gradient(160deg,var(--hd-1) 0%,var(--hd-2) 100%);
+  color:#fff;padding:44px 0 92px;position:relative;overflow:hidden;
+}
+header::after{
+  content:"";position:absolute;right:-80px;top:-60px;width:340px;height:340px;
+  background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);border-radius:50%;
+}
+.h-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;z-index:1}
+.h-title{font-size:30px;font-weight:700;letter-spacing:-.4px;display:flex;align-items:center;gap:12px}
+.h-title .ico{
+  width:40px;height:40px;background:rgba(255,255,255,.18);border-radius:11px;
+  display:grid;place-items:center;font-size:20px;
+}
+.h-sub{font-size:13.5px;color:rgba(255,255,255,.86);margin-top:7px}
+.h-meta{font-size:12.5px;color:rgba(255,255,255,.80);text-align:right;line-height:1.9}
+.h-meta b{font-weight:600;color:#fff}
+
+.shelf-btn{
+  display:inline-flex;align-items:center;gap:10px;margin-top:20px;
+  padding:11px 20px;border-radius:var(--r-ctl);text-decoration:none;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.38);
+  color:#fff;font-size:13.5px;font-weight:600;
+  transition:background .18s,transform .18s,box-shadow .18s;position:relative;z-index:1;
+}
+.shelf-btn:hover{background:rgba(255,255,255,.30);transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.shelf-btn:active{transform:translateY(0) scale(.99)}
+.shelf-btn .sb-t{white-space:nowrap}
+.shelf-btn .sb-s{font-size:11.5px;font-weight:400;color:rgba(255,255,255,.84)}
+.shelf-btn .sb-x{color:rgba(255,255,255,.6);font-size:11px}
+
+/* ---------- Sync banner（骨架页：目录已建好，书架数据还没同步） ---------- */
+/*
+  这里必须显式写 [hidden]{display:none}：浏览器给 hidden 属性内置的 display:none
+  是 user-agent 样式表规则，优先级低于任何作者自定义的 class 规则。下面这条
+  .sync-banner{display:flex} 一旦存在，就会不分青红皂白地盖掉 hidden 属性，
+  导致横幅哪怕在已同步（synced:true）时也甩不掉——用 :not([hidden]) 限定作用域，
+  同时补一条 [hidden]{display:none} 兜底，两条规则都不依赖脚本执行顺序。
+*/
+.sync-banner{
+  margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
+  padding:26px 26px;box-shadow:var(--shadow);
+  align-items:flex-start;gap:16px;
+}
+.sync-banner:not([hidden]){display:flex}
+.sync-banner[hidden]{display:none}
+.sync-banner .sb-ico{font-size:26px;line-height:1;flex-shrink:0}
+.sync-banner h2{font-size:16px;font-weight:700;color:var(--ink);margin-bottom:5px}
+.sync-banner p{font-size:13px;color:var(--ink-2);line-height:1.7}
+.sync-banner code{
+  background:var(--bg-2);border:1px solid var(--line);border-radius:5px;
+  padding:1.5px 6px;font-size:12px;color:var(--brand-ink);
+}
+.sync-banner .sb-cmds{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+
+/* ---------- Stats ---------- */
+.stats{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;
+  margin-top:-58px;position:relative;z-index:2;
+}
+.stat{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
+  padding:17px 18px;box-shadow:var(--shadow);
+}
+.stat .k{font-size:11.5px;color:var(--ink-3);letter-spacing:.4px;font-weight:500}
+.stat .v{font-size:26px;font-weight:700;margin-top:3px;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.stat .u{font-size:12px;font-weight:500;color:var(--ink-3);margin-left:2px}
+.stat .s{font-size:11px;color:var(--ink-3);margin-top:2px}
+.stat.fin .v{color:var(--c-fin-ink)}
+.stat.read .v{color:var(--brand-ink)}
+
+/* ---------- Panels ---------- */
+/* 同 .sync-banner 的坑：display:grid 会盖掉 hidden 属性，骨架页要隐藏这块时得显式加 [hidden] 规则 */
+.panels{grid-template-columns:376px minmax(0,1fr);gap:16px;margin-top:22px}
+.panels:not([hidden]){display:grid}
+.panels[hidden]{display:none}
+.panel{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
+  padding:20px 22px;box-shadow:var(--shadow);
+}
+.panel h3{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:.3px;margin-bottom:16px;
+  display:flex;align-items:center;gap:7px}
+.panel h3::before{content:"";width:3px;height:13px;background:var(--brand);border-radius:2px}
+.panel h3 .hint{font-weight:400;color:var(--ink-3);font-size:11.5px}
+
+/* 阅读状态环形图 */
+.donut-row{display:flex;align-items:center;gap:22px}
+.donut-box{position:relative;width:152px;height:152px;flex-shrink:0}
+.donut{width:100%;height:100%;display:block;transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-linecap:butt;
+  transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1),opacity .18s,stroke-width .18s}
+.donut .track{stroke:var(--line-2);stroke-width:11}
+.donut .seg{stroke-width:11;cursor:pointer}
+.donut-box.has-sel .seg{opacity:.32}
+.donut-box.has-sel .seg.sel{opacity:1;stroke-width:13.5}
+.donut-c{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;text-align:center;
+  pointer-events:none}
+.donut-c .n{font-size:33px;font-weight:800;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.donut-c .t{font-size:12px;color:var(--ink-3);margin-top:5px}
+.donut-c .t2{font-size:10.5px;color:var(--ink-3);margin-top:2px;font-variant-numeric:tabular-nums}
+
+.legend{flex:1;display:flex;flex-direction:column;gap:9px;min-width:0}
+.lg{display:flex;flex-direction:column;gap:5px;cursor:pointer;width:100%;
+   background:none;border:0;font-family:inherit;text-align:left;
+   padding:7px 8px;border-radius:var(--r-ctl);margin:-3px -6px;transition:background .15s}
+.lg:hover{background:var(--line-2)}
+.lg[aria-pressed="true"]{background:var(--line-2);box-shadow:inset 2px 0 0 var(--brand)}
+.lg-main{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.lg .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.lg .nm{flex:1;color:var(--ink-2);font-weight:500;white-space:nowrap}
+.lg .pct{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;width:34px;text-align:right}
+.lg .vl{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);min-width:26px;text-align:right}
+.lg-bar{height:5px;background:var(--line-2);border-radius:3px;overflow:hidden}
+.lg-bar span{display:block;height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.lg-def{font-size:10.5px;color:var(--ink-3);margin-top:12px;line-height:1.7}
+
+/* 分类分布 */
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:flex;align-items:center;gap:11px;font-size:12.5px;cursor:pointer;width:100%;
+  background:none;border:0;font-family:inherit;color:inherit;
+  padding:3px 6px;margin:0 -6px;border-radius:var(--r-tag);transition:background .15s}
+.bar:hover{background:var(--line-2)}
+.bar[aria-pressed="true"]{background:var(--line-2);box-shadow:inset 2px 0 0 var(--brand)}
+.bar .bn{width:80px;color:var(--ink-2);flex-shrink:0;text-align:left;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .bt{flex:1;height:8px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.bar .bf{display:block;height:100%;background:var(--brand);border-radius:4px;
+  transition:width .5s cubic-bezier(.4,0,.2,1)}
+.bar .bv{width:26px;text-align:right;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.bar .bp{width:34px;text-align:right;color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:11.5px}
+.bar.rest .bf{background:var(--c-un)}
+
+/* ---------- Controls ---------- */
+/* 同上：display:flex 会盖掉 hidden 属性 */
+.controls{
+  margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
+  padding:14px 16px;box-shadow:var(--shadow);
+  align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:12px;z-index:20;
+}
+.controls:not([hidden]){display:flex}
+.controls[hidden]{display:none}
+.search{position:relative;flex:1;min-width:210px}
+.search input{
+  width:100%;padding:9px 14px 9px 36px;border:1px solid var(--line);border-radius:var(--r-ctl);
+  font-size:13.5px;background:var(--bg-2);color:var(--ink);outline:none;transition:.15s;font-family:inherit;
+}
+.search input:focus{border-color:var(--brand);background:var(--card);box-shadow:0 0 0 3px var(--brand-soft)}
+.search input::placeholder{color:var(--ink-3);opacity:1}
+.search .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:14px}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  padding:7px 13px;border-radius:var(--r-ctl);border:1px solid var(--line);background:var(--card);
+  font-size:12.5px;cursor:pointer;color:var(--ink-2);transition:.15s;font-family:inherit;white-space:nowrap;
+}
+.chip:hover{border-color:var(--brand);color:var(--brand-ink)}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on-brand);font-weight:600}
+.chip .c{color:var(--ink-3);margin-left:4px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"] .c{color:var(--on-brand);opacity:.78}
+
+select{
+  padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--card);
+  font-size:12.5px;color:var(--ink-2);cursor:pointer;outline:none;font-family:inherit;transition:.15s;
+}
+select:hover{border-color:var(--brand)}
+.vtog{display:flex;border:1px solid var(--line);border-radius:var(--r-ctl);overflow:hidden}
+.vtog button{
+  padding:8px 12px;background:var(--card);border:none;cursor:pointer;color:var(--ink-3);
+  font-size:14px;transition:.15s;font-family:inherit;line-height:1;
+}
+.vtog button+button{border-left:1px solid var(--line)}
+.vtog button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand)}
+
+.count{font-size:12.5px;color:var(--ink-3);margin-left:auto;white-space:nowrap}
+.count b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+
+.gbtn{
+  padding:8px 12px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--card);
+  font-size:12.5px;cursor:pointer;color:var(--ink-2);transition:.15s;font-family:inherit;white-space:nowrap;
+}
+.gbtn:hover{border-color:var(--brand);color:var(--brand-ink)}
+.gbtn[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--on-brand);font-weight:600}
+
+.sec{margin-top:26px}
+.sec:first-of-type{margin-top:18px}
+.sec-head{
+  display:flex;align-items:baseline;gap:10px;padding:8px 2px;margin-bottom:6px;
+  border-bottom:2px solid var(--line);position:sticky;top:84px;background:var(--bg);z-index:15;
+}
+.sec-t{font-size:17px;font-weight:700;color:var(--ink)}
+.sec-n{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* ---------- Grid ---------- */
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));
+  gap:18px;margin-top:20px;
+}
+.card{cursor:pointer;transition:transform .2s}
+.card:hover{transform:translateY(-4px)}
+.card:active{transform:translateY(-1px) scale(.99)}
+.card:hover .cv{box-shadow:var(--shadow-lg)}
+.card:hover .ct{color:var(--brand-ink)}
+.cv{
+  position:relative;aspect-ratio:3/4;background:var(--line-2);border-radius:var(--r-ctl);overflow:hidden;
+  box-shadow:var(--shadow);transition:box-shadow .2s;
+}
+.cv img{width:100%;height:100%;object-fit:cover;display:block}
+.cv .fb{
+  position:absolute;inset:0;display:none;place-items:center;padding:16px;text-align:center;
+  background:linear-gradient(150deg,var(--bg-2),var(--line));color:var(--ink-2);
+  font-size:15px;font-weight:600;line-height:1.45;
+}
+.cv .badge{
+  position:absolute;top:7px;right:7px;padding:2.5px 7px;border-radius:var(--r-tag);
+  font-size:10px;font-weight:700;letter-spacing:.2px;
+}
+.badge.fin{background:var(--badge-fin);color:var(--badge-fin-ink)}
+.badge.sec{background:var(--badge-sec);color:var(--badge-sec-ink)}
+.cv .ovl{
+  position:absolute;left:0;right:0;bottom:0;height:44%;
+  background:linear-gradient(transparent,rgba(0,0,0,.68));
+  display:flex;align-items:flex-end;padding:9px;opacity:0;transition:opacity .2s;
+}
+.card:hover .ovl,.card:focus-visible .ovl{opacity:1}
+.ovl span{color:#fff;font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:4px}
+.acts{position:absolute;top:7px;left:7px;display:flex;gap:5px;z-index:3}
+.act-b{
+  min-width:26px;height:26px;padding:0 6px;border-radius:7px;
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  text-decoration:none;opacity:0;transition:opacity .2s,transform .2s;box-shadow:0 2px 7px rgba(0,0,0,.22);
+  font-size:12px;color:var(--brand-ink);line-height:1;cursor:pointer;
+}
+.card:hover .act-b,.card:focus-within .act-b{opacity:1}
+.act-b:hover{transform:scale(1.12)}
+@media(hover:none){.act-b{opacity:1}}
+
+.ct{font-size:13px;font-weight:600;margin-top:9px;line-height:1.45;transition:color .15s;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.ca{font-size:11.5px;color:var(--ink-3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar{height:4px;background:var(--line-2);border-radius:2px;margin-top:8px;overflow:hidden}
+.pfill{height:100%;border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.pmeta{display:flex;justify-content:space-between;gap:6px;font-size:10.5px;color:var(--ink-3);margin-top:4px}
+.pmeta .pp{font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ---------- List ---------- */
+.list{margin-top:20px;display:flex;flex-direction:column;gap:9px}
+.row{
+  display:flex;gap:15px;align-items:center;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-card);padding:11px 15px;cursor:pointer;transition:.15s;box-shadow:var(--shadow);
+}
+.row:hover{border-color:var(--brand);transform:translateX(3px)}
+.row .rc{width:44px;height:59px;border-radius:var(--r-tag);overflow:hidden;flex-shrink:0;
+  background:var(--line-2);position:relative}
+.row .rc img{width:100%;height:100%;object-fit:cover}
+.row .rc .fb{
+  position:absolute;inset:0;display:none;place-items:center;background:var(--bg-2);
+  font-size:11px;color:var(--ink-2);font-weight:600;text-align:center;padding:4px;line-height:1.3;
+}
+.row .ri{flex:1;min-width:0}
+.row .rt{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .rm{font-size:12px;color:var(--ink-3);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row .rm i{font-style:normal}
+.row .rp{width:190px;flex-shrink:0;display:flex;align-items:center;gap:10px}
+.row .rpb{flex:1;height:6px;background:var(--line-2);border-radius:3px;overflow:hidden}
+.row .rpf{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.row .rpv{font-size:12px;font-weight:700;width:56px;text-align:right;font-variant-numeric:tabular-nums}
+.tag{padding:1.5px 7px;border-radius:5px;font-size:10.5px;font-weight:700}
+.tag.fin{background:var(--fin-soft);color:var(--c-fin-ink)}
+.tag.sec{background:var(--line-2);color:var(--ink-2)}
+
+.rnote{
+  display:inline-flex;align-items:center;gap:4px;padding:6px 11px;border-radius:var(--r-ctl);
+  background:var(--brand-soft);color:var(--brand-ink);text-decoration:none;
+  font-size:11.5px;font-weight:600;white-space:nowrap;transition:.15s;flex-shrink:0;
+}
+.rnote:hover{background:var(--brand);color:var(--on-brand)}
+.racts{display:flex;gap:7px;flex-shrink:0}
+.rlink{
+  display:inline-flex;align-items:center;padding:6px 11px;border-radius:var(--r-ctl);
+  background:var(--bg-2);border:1px solid var(--line);color:var(--ink-2);text-decoration:none;
+  font-size:11.5px;font-weight:500;white-space:nowrap;transition:.15s;
+}
+.rlink:hover{border-color:var(--brand);color:var(--brand-ink);background:var(--card)}
+
+.empty{text-align:center;padding:70px 20px;color:var(--ink-3)}
+.empty .e1{font-size:44px;margin-bottom:12px;opacity:.5}
+.empty .e2{font-size:14px}
+.empty button{
+  margin-top:16px;padding:9px 18px;border:1px solid var(--line);border-radius:var(--r-ctl);
+  background:var(--card);color:var(--ink-2);font-size:13px;font-family:inherit;cursor:pointer;transition:.15s;
+}
+.empty button:hover{border-color:var(--brand);color:var(--brand-ink)}
+
+footer{text-align:center;margin-top:44px;font-size:12px;color:var(--ink-3);line-height:2}
+
+@media(max-width:1080px){
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .panels{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:640px){
+  .wrap{padding:0 15px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  header{padding:32px 0 80px}
+  .h-title{font-size:23px}
+  .h-meta{text-align:left}
+  .donut-row{flex-direction:column;align-items:stretch;gap:18px}
+  .donut-box{align-self:center}
+  .legend{margin:0}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px}
+  .controls{position:static}
+  .sec-head{top:0}
+  .row .rp{display:none}
+  .act-b{opacity:1}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;scroll-behavior:auto !important;
+  }
+  .card:hover,.row:hover{transform:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="h-top">
+      <div>
+        <h1 class="h-title"><span class="ico" aria-hidden="true">📚</span>我的书架</h1>
+        <p class="h-sub">微信读书个人藏书整理 · 按分类、进度与阅读时长全景浏览</p>
+      </div>
+      <div class="h-meta" id="hmeta"></div>
+    </div>
+    <a class="shelf-btn" id="shelfBtn" href="https://weread.qq.com/web/shelf" target="_blank" rel="noopener">
+      <span class="sb-t">📚 打开微信读书网页版书架</span>
+      <span class="sb-x" aria-hidden="true">·</span>
+      <span class="sb-s">已登录直接显示书架，未登录先扫码</span>
+    </a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="sync-banner" id="syncBanner" hidden>
+    <span class="sb-ico" aria-hidden="true">📦</span>
+    <div>
+      <h2>目录已经搭好，书架还没同步</h2>
+      <p>
+        <code>个人笔记/</code>、<code>书籍整理/</code> 这些目录都已经就位，
+        但书架数据还是空的——之前选的是「稍后同步」。想看真实的书籍、进度、分类，
+        随时回来跑一下同步命令即可，不影响你现在先整理笔记。
+      </p>
+      <div class="sb-cmds">
+        <span>现在同步 → <code>python3 init_shelf.py --sync</code></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="panels" id="panels">
+    <section class="panel">
+      <h3>阅读状态 <span class="hint">（点击筛选）</span></h3>
+      <div class="donut-row">
+        <div class="donut-box" id="donutBox">
+          <svg class="donut" id="donut" viewBox="0 0 100 100" role="img" aria-labelledby="donutT">
+            <title id="donutT">阅读状态分布环形图</title>
+            <circle class="track" cx="50" cy="50" r="42"></circle>
+            <g id="segs"></g>
+          </svg>
+          <div class="donut-c">
+            <span class="n" id="dn">0</span>
+            <span class="t" id="dt">书架条目</span>
+            <span class="t2" id="dt2"></span>
+          </div>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <p class="lg-def" id="legendDef"></p>
+    </section>
+    <section class="panel">
+      <h3>分类分布 <span class="hint">（点击筛选）</span></h3>
+      <div class="bars" id="bars"></div>
+    </section>
+  </div>
+
+  <div class="controls" id="controls">
+    <div class="search">
+      <span class="si" aria-hidden="true">🔍</span>
+      <label class="sr" for="q">搜索书名或作者</label>
+      <input type="search" id="q" placeholder="搜索书名或作者…">
+    </div>
+    <div class="chips" id="statusChips" role="group" aria-label="按阅读状态筛选"></div>
+    <label class="sr" for="catSel">按分类筛选</label>
+    <select id="catSel"></select>
+    <label class="sr" for="sortSel">排序方式</label>
+    <select id="sortSel">
+      <option value="recent">最近阅读</option>
+      <option value="progress">阅读进度</option>
+      <option value="time">阅读时长</option>
+      <option value="title">书名</option>
+    </select>
+    <div class="vtog" role="group" aria-label="视图切换">
+      <button id="vg" type="button" aria-pressed="true" title="网格视图">▦<span class="sr">网格视图</span></button>
+      <button id="vl" type="button" aria-pressed="false" title="列表视图">☰<span class="sr">列表视图</span></button>
+    </div>
+    <button id="vgp" class="gbtn" type="button" aria-pressed="false" title="按最近打开月份分栏">📅 分月</button>
+    <div class="count" id="count" role="status"></div>
+  </div>
+
+  <div id="body"></div>
+
+  <footer>
+    数据来源：微信读书 · 书架同步接口<br>
+    <span id="foot"></span>
+  </footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/;
+const ITEMS = DATA.items;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* 数据里历史遗留的长破折号统一成普通连字符 */
+const dash = s => String(s==null?'':s).replace(/[\u2014\u2013]/g,'-');
+
+const STATE = { q:'', status:'all', cat:'all', sort:'recent', view:'grid', group:'none', flat:[] };
+
+/* ---------------------------------------------------------
+   阅读状态口径（这里是「书本数量」以前对不上的根源）
+   旧逻辑靠接口的 isStartReading 字段判断，同样是 0% 的书
+   有的落在「在读」、有的落在「未读」，环形图和卡片上印的
+   百分比互相矛盾，图例三项加起来也解释不了 0% 的那批书。
+
+   现在只用两个可信字段推导，卡片上印什么、图里就算在哪一格：
+     finished 已读完 = progress >= 100
+     reading  在读   = 0 < progress < 100
+     skimmed  翻过   = progress 0，但有阅读时长（打开过没往下走）
+     unread   未读   = progress 0，且阅读时长 0
+   四格互斥且必然覆盖全部条目，合计恒等于书架条目数。
+   --------------------------------------------------------- */
+const ORDER  = ['finished','reading','skimmed','unread'];
+const LABELS = { finished:'已读完', reading:'在读', skimmed:'翻过', unread:'未读' };
+const COLORS = { finished:'var(--c-fin)', reading:'var(--c-read)', skimmed:'var(--c-skim)', unread:'var(--c-un)' };
+const INKS   = { finished:'var(--c-fin-ink)', reading:'var(--c-read-ink)', skimmed:'var(--c-skim-ink)', unread:'var(--c-un-ink)' };
+
+function stateOf(i){
+  if (i.progress >= 100) return 'finished';
+  if (i.progress > 0)    return 'reading';
+  return i.readingTime > 0 ? 'skimmed' : 'unread';
+}
+ITEMS.forEach(i => { i.st = stateOf(i); });
+
+function tally(list){
+  const c = { finished:0, reading:0, skimmed:0, unread:0 };
+  list.forEach(i => c[i.st]++);
+  return c;
+}
+
+/* 最大余额法取整，保证图例百分比合计正好 100 */
+function pcts(vals){
+  const total = vals.reduce((a,b)=>a+b,0);
+  if (!total) return vals.map(()=>0);
+  const raw = vals.map(v => v/total*100);
+  const out = raw.map(Math.floor);
+  const rest = 100 - out.reduce((a,b)=>a+b,0);
+  const rank = raw.map((v,i)=>[v-out[i], i]).sort((a,b)=> b[0]-a[0] || a[1]-b[1]);
+  for (let k=0;k<rest;k++) out[rank[k % rank.length][1]]++;
+  return out;
+}
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 头部与统计 ---------- */
+function renderMeta(){
+  const sec = ITEMS.reduce((s,i)=>s+i.readingTime,0);
+  $('hmeta').innerHTML =
+    `数据更新：<b>${esc(DATA.generatedAt)}</b><br>` +
+    `累计阅读：<b>${Math.floor(sec/3600)} 小时 ${Math.floor(sec%3600/60)} 分钟</b>`;
+  $('foot').textContent =
+    `共 ${DATA.totalItems} 个书架条目 · ${DATA.bookCount} 本电子书` +
+    (DATA.albumCount ? ` · ${DATA.albumCount} 个有声书` : '') +
+    (DATA.mpCount ? ` · ${DATA.mpCount} 个文章收藏` : '') +
+    (DATA.notesAvailable ? ` · 已整理 ${DATA.notesAvailable} 本（带 📝 笔记 入口）` : '');
+}
+
+function renderStats(){
+  /* 状态分布交给环形图，这里只放环形图没有的指标，避免同一个数字出现两次 */
+  const c = tally(ITEMS);
+  const sec = ITEMS.reduce((s,i)=>s+i.readingTime,0);
+  const avg = Math.round(ITEMS.reduce((s,i)=>s+i.progress,0) / (ITEMS.length||1));
+  const cards = [
+    { k:'书架条目', v:DATA.totalItems, u:'个', s:`${DATA.bookCount} 本电子书` +
+        (DATA.mpCount ? ` + ${DATA.mpCount} 个文章收藏` : '') },
+    { k:'已读完',   v:c.finished, u:'本', cls:'fin', s:`占书架 ${Math.round(c.finished/(ITEMS.length||1)*100)}%` },
+    { k:'累计阅读', v:Math.floor(sec/3600), u:'小时', s:`约 ${Math.floor(sec/3600/(ITEMS.length||1)*10)/10} 小时/本` },
+    { k:'平均进度', v:avg, u:'%', cls:'read', s:'全部条目算术平均' },
+    { k:'已整理笔记', v:DATA.notesAvailable||0, u:'本', s:'卡片上带 📝 入口' },
+    { k:'私密阅读', v:ITEMS.filter(i=>i.secret).length, u:'本', s:'不出现在微信读书主页' },
+  ];
+  $('stats').innerHTML = cards.map(x =>
+    `<div class="stat ${x.cls||''}">
+       <div class="k">${x.k}</div>
+       <div class="v">${x.v}<span class="u">${x.u}</span></div>
+       <div class="s">${esc(x.s)}</div>
+     </div>`).join('');
+}
+
+/* ---------- 环形图 + 图例 ---------- */
+/* base = 只应用「分类 + 搜索」的集合。环形图描述这个集合的状态构成，
+   圆心数字与四段之和恒等；状态筛选只做高亮，不再让数字和图对不上。 */
+function baseSet(){
+  return ITEMS.filter(i=>{
+    if (STATE.cat!=='all' && i.cat1!==STATE.cat) return false;
+    if (STATE.q){
+      if (!(i.title+' '+i.author).toLowerCase().includes(STATE.q)) return false;
+    }
+    return true;
+  });
+}
+
+const R = 42, C = 2 * Math.PI * R;   // 周长，用作 dasharray 基准
+
+function renderDonut(){
+  const base = baseSet();
+  const c = tally(base);
+  const total = base.length;
+  const shown = pcts(ORDER.map(k=>c[k]));
+
+  // 扇段：用精确比例画图形，用取整后的百分比写文字
+  let acc = 0;
+  $('segs').innerHTML = ORDER.map(k=>{
+    if (!c[k]) return '';
+    const frac = c[k]/total;
+    const len  = frac * C;
+    const gap  = total>1 && c[k]<total ? Math.min(2.2, len*0.35) : 0;
+    const el = `<circle class="seg" data-st="${k}" cx="50" cy="50" r="${R}"
+        style="stroke:${COLORS[k]};stroke-dasharray:${REDUCED ? (len-gap).toFixed(2) : 0} ${C.toFixed(2)};stroke-dashoffset:${(-acc).toFixed(2)}"
+        data-len="${(len-gap).toFixed(2)}"
+        role="button" tabindex="0"
+        aria-label="${LABELS[k]} ${c[k]} 本"><title>${LABELS[k]} ${c[k]} 本</title></circle>`;
+    acc += len;
+    return el;
+  }).join('');
+
+  if (!REDUCED){
+    requestAnimationFrame(()=>{
+      $('segs').querySelectorAll('.seg').forEach(el=>{
+        el.style.strokeDasharray = `${el.dataset.len} ${C.toFixed(2)}`;
+      });
+    });
+  }
+  $('segs').querySelectorAll('.seg').forEach(el=>{
+    const go = ()=> toggleStatus(el.dataset.st);
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', e=>{ if (e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+  });
+
+  // 圆心：跟着筛选走
+  const sel = STATE.status;
+  if (sel==='all'){
+    $('dn').textContent = total;
+    $('dn').style.color = 'var(--ink)';
+    $('dt').textContent = (STATE.cat==='all' && !STATE.q) ? '书架条目' : '筛选结果';
+    $('dt2').textContent = '';
+  } else {
+    $('dn').textContent = c[sel];
+    $('dn').style.color = INKS[sel];
+    $('dt').textContent = LABELS[sel];
+    $('dt2').textContent = total ? `占 ${shown[ORDER.indexOf(sel)]}%` : '';
+  }
+  $('donutBox').classList.toggle('has-sel', sel!=='all');
+  $('segs').querySelectorAll('.seg').forEach(el=>{
+    el.classList.toggle('sel', el.dataset.st===sel);
+  });
+
+  // 图例
+  $('legend').innerHTML = ORDER.map((k,n)=>
+    `<button class="lg" type="button" data-st="${k}" aria-pressed="${sel===k}">
+       <span class="lg-main">
+         <span class="dot" style="background:${COLORS[k]}"></span>
+         <span class="nm">${LABELS[k]}</span>
+         <span class="pct">${shown[n]}%</span>
+         <span class="vl">${c[k]}</span>
+       </span>
+       <span class="lg-bar"><span style="width:${shown[n]}%;background:${COLORS[k]}"></span></span>
+     </button>`).join('');
+  $('legend').querySelectorAll('.lg').forEach(el=>{
+    el.onclick = ()=> toggleStatus(el.dataset.st);
+  });
+
+  $('legendDef').textContent =
+    `口径：已读完 = 进度 100%；在读 = 进度 1-99%；翻过 = 进度 0% 但有阅读时长；未读 = 进度 0% 且时长 0。` +
+    `四项互斥，合计 ${total} 条` + (sel==='all' ? '，即圆心数字。' : '。');
+}
+
+function toggleStatus(st){
+  STATE.status = (STATE.status===st) ? 'all' : st;
+  syncChips();
+  render();
+}
+
+/* ---------- 分类分布 ---------- */
+const TOPN = 8;
+
+function catCounts(){
+  const m = {};
+  ITEMS.forEach(i => { m[i.cat1] = (m[i.cat1]||0)+1; });
+  return Object.entries(m).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0],'zh'));
+}
+
+function renderBars(){
+  const all = catCounts();
+  const total = ITEMS.length || 1;
+  const top = all.slice(0, TOPN);
+  const restN = all.slice(TOPN).reduce((s,[,v])=>s+v, 0);
+  const restC = all.length - top.length;
+  const mx = top.length ? top[0][1] : 1;
+
+  /* 以前只画 TOP8，剩下的分类凭空消失，条形加起来对不上书架总数。
+     现在补一行「其他 N 个分类」，让这张图的合计等于书架条目数。 */
+  const rows = top.map(([n,v])=>({ name:n, v, cat:n, cls:'' }));
+  if (restN) rows.push({ name:`其他 ${restC} 个分类`, v:restN, cat:null, cls:'rest' });
+
+  $('bars').innerHTML = rows.map(r=>{
+    const on = r.cat!==null && STATE.cat===r.cat;
+    return `<button class="bar ${r.cls}" type="button" ${r.cat!==null?`data-cat="${esc(r.cat)}"`:'disabled'}
+        aria-pressed="${on}">
+       <span class="bn" title="${esc(r.name)}">${esc(r.name)}</span>
+       <span class="bt"><span class="bf" style="width:${Math.max(2, r.v/mx*100)}%"></span></span>
+       <span class="bv">${r.v}</span>
+       <span class="bp">${Math.round(r.v/total*100)}%</span>
+     </button>`;
+  }).join('');
+
+  $('bars').querySelectorAll('.bar[data-cat]').forEach(el=>{
+    el.onclick = ()=>{
+      const c = el.dataset.cat;
+      STATE.cat = (STATE.cat===c) ? 'all' : c;
+      $('catSel').value = STATE.cat;
+      render();
+    };
+  });
+}
+
+/* ---------- 控件 ---------- */
+function syncChips(){
+  $('statusChips').querySelectorAll('.chip').forEach(el=>{
+    el.setAttribute('aria-pressed', String(el.dataset.st===STATE.status));
+  });
+}
+
+function renderChips(){
+  const c = tally(ITEMS);
+  const defs = [['all','全部', ITEMS.length]].concat(ORDER.map(k=>[k, LABELS[k], c[k]]));
+  $('statusChips').innerHTML = defs.map(([k,n,v])=>
+    `<button class="chip" type="button" data-st="${k}" aria-pressed="${STATE.status===k}">${n}<span class="c">${v}</span></button>`).join('');
+  $('statusChips').querySelectorAll('.chip').forEach(el=>{
+    el.onclick = ()=>{ STATE.status = el.dataset.st; syncChips(); render(); };
+  });
+}
+
+function renderCatSel(){
+  $('catSel').innerHTML = '<option value="all">全部分类</option>' +
+    catCounts().map(([n,v])=>`<option value="${esc(n)}">${esc(n)} (${v})</option>`).join('');
+  $('catSel').value = STATE.cat;
+}
+
+function resetFilters(){
+  STATE.q=''; STATE.status='all'; STATE.cat='all';
+  $('q').value=''; $('catSel').value='all';
+  syncChips(); render();
+}
+
+function bind(){
+  let t;
+  $('q').oninput = e => { clearTimeout(t); t=setTimeout(()=>{ STATE.q=e.target.value.trim().toLowerCase(); render(); },180); };
+  $('catSel').onchange = e => { STATE.cat = e.target.value; render(); };
+  $('sortSel').onchange = e => { STATE.sort = e.target.value; render(); };
+  $('vg').onclick = ()=>{ setView('grid'); };
+  $('vl').onclick = ()=>{ setView('list'); };
+  $('vgp').onclick = ()=>{
+    STATE.group = STATE.group==='month' ? 'none' : 'month';
+    $('vgp').setAttribute('aria-pressed', String(STATE.group==='month'));
+    render();
+  };
+}
+
+function setView(v){
+  STATE.view = v;
+  $('vg').setAttribute('aria-pressed', String(v==='grid'));
+  $('vl').setAttribute('aria-pressed', String(v==='list'));
+  render();
+}
+
+/* ---------- 筛选排序 ---------- */
+function pick(){
+  const r = baseSet().filter(i => STATE.status==='all' || i.st===STATE.status);
+  const cmp = {
+    recent:  (a,b)=> b.lastReadTs - a.lastReadTs,
+    progress:(a,b)=> b.progress - a.progress || b.readingTime - a.readingTime,
+    time:    (a,b)=> b.readingTime - a.readingTime,
+    title:   (a,b)=> a.title.localeCompare(b.title,'zh'),
+  }[STATE.sort];
+  return r.sort(cmp);
+}
+
+/* ---------- 渲染 ---------- */
+const pcolor = i => COLORS[i.st];
+const pink   = i => INKS[i.st];
+
+/* 微信读书网页版书架：已登录直接显示书架，未登录走扫码 */
+const WR_SHELF = 'https://weread.qq.com/web/shelf';
+function openBook(){ window.open(WR_SHELF, '_blank', 'noopener'); }
+
+function imgFallback(el){
+  const fb = el.parentNode.querySelector('.fb');
+  if (fb) fb.style.display = 'grid';
+  el.style.display = 'none';
+}
+
+function cardHtml(i){
+  return `
+    <div class="card" data-i="${i._idx}" role="button" tabindex="0"
+         aria-label="${esc(i.title)}，${LABELS[i.st]} ${i.progress}%">
+      <div class="cv">
+        <img src="${esc(i.cover)}" alt="《${esc(i.title)}》封面" loading="lazy" onerror="imgFallback(this)">
+        <div class="fb">${esc(i.title)}</div>
+        ${i.st==='finished'?'<span class="badge fin">已读完</span>':''}
+        ${i.secret?'<span class="badge sec" style="top:auto;bottom:7px">私密</span>':''}
+        <div class="acts">
+          ${i.noteUrl?`<a class="act-b" href="${esc(i.noteUrl)}" title="读书笔记"
+             onclick="event.stopPropagation()"><span aria-hidden="true">📝</span><span class="sr">读书笔记</span></a>`:''}
+          <a class="act-b" href="${WR_SHELF}" target="_blank" rel="noopener"
+             title="在网页版书架打开" onclick="event.stopPropagation()"><span aria-hidden="true">🔗</span><span class="sr">在网页版书架打开</span></a>
+        </div>
+        <div class="ovl"><span>📚 打开网页版书架</span></div>
+      </div>
+      <div class="ct">${esc(i.title)}</div>
+      <div class="ca">${esc(i.author)}</div>
+      <div class="pbar"><div class="pfill" style="width:${Math.max(i.progress,0)}%;background:${pcolor(i)}"></div></div>
+      <div class="pmeta">
+        <span class="pp" style="color:${pink(i)}">${i.progress}% ${LABELS[i.st]}</span>
+        <span>${esc(i.lastRead||'')}</span>
+      </div>
+    </div>`;
+}
+
+function rowHtml(i){
+  return `
+    <div class="row" data-i="${i._idx}" role="button" tabindex="0"
+         aria-label="${esc(i.title)}，${LABELS[i.st]} ${i.progress}%">
+      <div class="rc">
+        <img src="${esc(i.cover)}" alt="" loading="lazy" onerror="imgFallback(this)">
+        <div class="fb">${esc(i.title)}</div>
+      </div>
+      <div class="ri">
+        <div class="rt">${esc(i.title)}</div>
+        <div class="rm">
+          <i>${esc(i.author)}</i>
+          <i>${esc(i.category)}</i>
+          ${i.st==='finished'?'<span class="tag fin">已读完</span>':''}
+          ${i.secret?'<span class="tag sec">私密</span>':''}
+          <i>时长 ${esc(dash(i.readingTimeText))}</i>
+          ${i.lastRead?`<i>最近 ${esc(i.lastRead)}</i>`:''}
+        </div>
+      </div>
+      <div class="rp">
+        <div class="rpb"><div class="rpf" style="width:${Math.max(i.progress,0)}%;background:${pcolor(i)}"></div></div>
+        <div class="rpv" style="color:${pink(i)}">${i.progress}%</div>
+      </div>
+      <div class="racts">
+        ${i.noteUrl?`<a class="rnote" href="${esc(i.noteUrl)}" onclick="event.stopPropagation()">📝 笔记</a>`:''}
+        <a class="rlink" href="${WR_SHELF}" target="_blank" rel="noopener"
+           onclick="event.stopPropagation()" title="在网页版书架打开">详情</a>
+      </div>
+    </div>`;
+}
+
+function renderGrid(list){
+  $('body').innerHTML = `<div class="grid">` + list.map(cardHtml).join('') + `</div>`;
+  bindCards();
+}
+
+function renderList(list){
+  $('body').innerHTML = `<div class="list">` + list.map(rowHtml).join('') + `</div>`;
+  bindCards();
+}
+
+/* 按「最近打开月份」分栏，月份降序，组内沿用当前排序 */
+function groupByMonth(list){
+  const map = new Map();
+  for (const i of list){
+    let key = '0000-00';
+    if (i.lastReadTs){
+      const d = new Date(i.lastReadTs*1000);
+      key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    }
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(i);
+  }
+  return [...map.entries()]
+    .sort((a,b)=> b[0].localeCompare(a[0]))
+    .map(([k, items])=>({
+      key:k,
+      label: k==='0000-00' ? '没有打开记录' : `${k.slice(0,4)} 年 ${parseInt(k.slice(5),10)} 月`,
+      count: items.length,
+      items
+    }));
+}
+
+function renderGrouped(sections){
+  const isGrid = STATE.view==='grid';
+  const inner = s => isGrid
+    ? `<div class="grid">` + s.items.map(cardHtml).join('') + `</div>`
+    : `<div class="list">` + s.items.map(rowHtml).join('') + `</div>`;
+  $('body').innerHTML = sections.map(s=>`
+    <section class="sec">
+      <div class="sec-head">
+        <span class="sec-t">${esc(s.label)}</span>
+        <span class="sec-n">${s.count} 本</span>
+      </div>
+      ${inner(s)}
+    </section>`).join('');
+  bindCards();
+}
+
+function bindCards(){
+  $('body').querySelectorAll('[data-i]').forEach(el=>{
+    el.onclick = openBook;
+    el.onkeydown = e => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); openBook(); } };
+  });
+}
+
+function render(){
+  const list = pick();
+  STATE.flat = list;
+  list.forEach((x,k)=>x._idx=k);
+
+  renderDonut();
+  renderBars();
+
+  $('count').innerHTML = `显示 <b>${list.length}</b> / ${ITEMS.length} 条`;
+
+  if (!list.length){
+    $('body').innerHTML = `<div class="empty">
+      <div class="e1" aria-hidden="true">🔍</div>
+      <div class="e2">没有匹配的书，换个关键词或放开筛选试试</div>
+      <button type="button" id="resetBtn">清空筛选条件</button></div>`;
+    $('resetBtn').onclick = resetFilters;
+    return;
+  }
+  if (STATE.group==='month'){
+    renderGrouped(groupByMonth(list));
+  } else {
+    STATE.view==='grid' ? renderGrid(list) : renderList(list);
+  }
+}
+
+/* ---------- init ---------- */
+/* 骨架页（还没同步过）：不跑任何依赖 items 的渲染逻辑，只显示同步引导横幅，
+   避免环形图/分类图/控件栏在数据为空时显示一堆 0%、空图例，看起来像坏了。 */
+if (DATA.synced === false){
+  $('syncBanner').hidden = false;
+  $('panels').hidden = true;
+  $('controls').hidden = true;
+  $('hmeta').innerHTML = `目录已生成：<b>${esc(DATA.generatedAt)}</b>`;
+  $('stats').innerHTML = '';
+  $('foot').textContent = '书架还没有同步 · 目录结构已就位';
+  $('body').innerHTML = `<div class="empty">
+    <div class="e1" aria-hidden="true">📦</div>
+    <div class="e2">还没有同步书架数据，先去整理笔记也没问题</div>
+  </div>`;
+} else {
+  renderMeta();
+  renderStats();
+  renderChips();
+  renderCatSel();
+  bind();
+  render();
+}
+</script>
+</body>
+</html>

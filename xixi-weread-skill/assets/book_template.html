@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>纳瓦尔宝典 · 读书整理</title>
+<style>
+:root{
+  --bg:#f6f7f5;--card:#fff;--ink:#1b1f1d;--ink-2:#5d6b63;--ink-3:#93a09a;
+  --line:#e6eae7;--line-2:#f0f2f0;
+  --brand:#1a7f4b;--brand-soft:#e8f3ed;--gold:#c8952c;--gold-soft:#fbf3e2;--gray:#c9d0cc;
+  --shadow:0 1px 2px rgba(20,40,30,.04),0 4px 16px rgba(20,40,30,.05);
+  --shadow-lg:0 4px 12px rgba(20,40,30,.08),0 12px 40px rgba(20,40,30,.10);
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.7;padding-bottom:70px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+
+/* ---------- 顶部导航 ---------- */
+.topbar{
+  background:linear-gradient(160deg,#1a7f4b,#14643c);color:#fff;padding:13px 0;
+  position:relative;
+}
+.topbar .wrap{display:flex;align-items:center;gap:14px;font-size:13px}
+.topbar a{color:rgba(255,255,255,.85);text-decoration:none;display:flex;align-items:center;gap:6px;transition:.15s}
+.topbar a:hover{color:#fff}
+.topbar .sp{flex:1}
+.topbar .t{opacity:.7;font-size:12px}
+
+/* ---------- 书籍头部 ---------- */
+.hero{background:#fff;border-bottom:1px solid var(--line)}
+.hero .wrap{display:flex;gap:26px;padding:28px 24px;align-items:flex-start;flex-wrap:wrap}
+.cover{
+  width:132px;flex-shrink:0;aspect-ratio:3/4;border-radius:9px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(20,40,30,.16);background:var(--line-2);position:relative;
+}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .fb{
+  position:absolute;inset:0;display:none;place-items:center;padding:12px;text-align:center;
+  background:linear-gradient(150deg,#e9edea,#dde4e0);color:var(--ink-2);font-size:15px;font-weight:600;line-height:1.5;
+}
+.hinfo{flex:1;min-width:260px}
+.hinfo h1{font-size:27px;font-weight:700;letter-spacing:-.5px;line-height:1.35}
+.meta{font-size:13.5px;color:var(--ink-2);margin-top:7px}
+.meta span+span::before{content:"·";margin:0 8px;color:var(--ink-3)}
+.rating{display:flex;align-items:center;gap:9px;margin-top:12px;flex-wrap:wrap}
+.rscore{font-size:22px;font-weight:700;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
+.rpeople{font-size:12px;color:var(--ink-3)}
+.intro{
+  font-size:13.5px;color:var(--ink-2);margin-top:14px;line-height:1.85;
+  padding:13px 16px;background:var(--bg);border-radius:10px;border-left:3px solid var(--brand);
+}
+.actions{display:flex;gap:9px;margin-top:16px;flex-wrap:wrap}
+.btn{
+  padding:8px 16px;border-radius:9px;font-size:13px;font-weight:500;text-decoration:none;
+  display:inline-flex;align-items:center;gap:6px;transition:.15s;border:1px solid transparent;cursor:pointer;
+}
+.btn-p{background:var(--brand);color:#fff}
+.btn-p:hover{background:#14643c}
+.btn-s{background:#fff;color:var(--ink-2);border-color:var(--line)}
+.btn-s:hover{border-color:var(--brand);color:var(--brand)}
+
+/* 阅读进度 */
+.prog-box{margin-top:16px;max-width:430px}
+.prog-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin-bottom:6px}
+.prog-top b{color:var(--brand);font-weight:600}
+.prog-bar{height:7px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--brand),#2fa05f);border-radius:4px;transition:width .8s}
+
+/* ---------- 统计条 ---------- */
+.stats{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:22px 0 0;
+}
+.stat{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:14px 16px;box-shadow:var(--shadow);text-align:center;
+}
+.stat .v{font-size:22px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+.stat .k{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* ---------- Tabs ---------- */
+.tabs{
+  display:flex;gap:4px;margin:26px 0 0;background:#fff;border:1px solid var(--line);
+  border-radius:12px;padding:5px;box-shadow:var(--shadow);overflow-x:auto;position:sticky;top:12px;z-index:20;
+}
+.tab{
+  flex:1;min-width:88px;padding:9px 12px;border:none;background:none;border-radius:8px;
+  font-size:13px;color:var(--ink-2);cursor:pointer;transition:.15s;white-space:nowrap;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.tab:hover{background:var(--line-2)}
+.tab.on{background:var(--brand);color:#fff;font-weight:500}
+.tab .n{font-size:11px;opacity:.7;font-variant-numeric:tabular-nums}
+
+/* ---------- 内容 ---------- */
+.pane{display:none;margin-top:20px}
+.pane.on{display:block;animation:fade .3s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);
+  padding:24px 26px;box-shadow:var(--shadow);margin-bottom:16px}
+.panel h3{
+  font-size:14px;font-weight:600;color:var(--ink-2);margin-bottom:15px;
+  display:flex;align-items:center;gap:8px;letter-spacing:.3px;
+}
+.panel h3::before{content:"";width:3px;height:14px;background:var(--brand);border-radius:2px}
+.panel h3 .hint{margin-left:auto;font-size:11.5px;font-weight:400;color:var(--ink-3)}
+
+/* 笔记正文 */
+.notes h4{
+  font-size:15px;font-weight:600;color:var(--brand);margin:22px 0 10px;
+  padding-bottom:7px;border-bottom:1px dashed var(--line);
+}
+.notes h4:first-child{margin-top:0}
+.notes ul,.notes ol{margin:0 0 12px 22px}
+.notes li{margin-bottom:8px;font-size:14.5px;color:var(--ink);line-height:1.85}
+.notes ol li{color:var(--ink-2)}
+.notes p{font-size:14.5px;color:var(--ink-2);line-height:1.9;
+  padding:14px 16px;background:var(--gold-soft);border-radius:10px;margin-top:6px;
+  border-left:3px solid var(--gold)}
+.notes strong{color:var(--ink);font-weight:600}
+/* 以下几类由 parse_md 的标题/表格/围栏分支产出 */
+.notes h3{
+  font-size:16.5px;font-weight:700;color:var(--ink);margin:26px 0 12px;
+  padding-bottom:8px;border-bottom:2px solid var(--brand);
+}
+.notes h3:first-child{margin-top:0}
+.notes table{
+  width:100%;border-collapse:collapse;margin:12px 0 16px;
+  font-size:13.5px;background:#fff;border-radius:10px;overflow:hidden;
+  box-shadow:0 0 0 1px var(--line);
+}
+.notes th,.notes td{padding:10px 13px;text-align:left;vertical-align:top;
+  border-bottom:1px solid var(--line);line-height:1.75}
+.notes th{background:var(--gold-soft);color:var(--ink);font-weight:600;white-space:nowrap}
+.notes td{color:var(--ink-2)}
+.notes tbody tr:last-child td{border-bottom:0}
+.notes details.md-expand{
+  margin:10px 0 14px;border:1px solid var(--line);border-radius:11px;
+  background:#fff;overflow:hidden;
+}
+.notes details.md-expand summary{
+  cursor:pointer;padding:11px 15px;font-size:13px;font-weight:600;
+  color:var(--brand);list-style:none;user-select:none;
+}
+.notes details.md-expand summary::-webkit-details-marker{display:none}
+.notes details.md-expand summary::before{content:"\25B8\00a0\00a0"}
+.notes details.md-expand[open] summary::before{content:"\25BE\00a0\00a0"}
+.notes details.md-expand .inner{padding:2px 16px 12px;border-top:1px dashed var(--line)}
+.notes details.md-expand .inner > :first-child{margin-top:12px}
+.notes details.md-expand .inner p{background:transparent;border-left:0;padding:0;margin:8px 0}
+.notes code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+  background:var(--gold-soft);padding:1.5px 5px;border-radius:5px;color:var(--ink);
+}
+.notes pre{
+  background:#f7f5f2;border:1px solid var(--line);border-radius:10px;
+  padding:13px 15px;overflow-x:auto;margin:10px 0 14px;
+}
+.notes pre code{background:transparent;padding:0;font-size:12.5px;line-height:1.7}
+
+/* 划线卡片 */
+.hl{
+  border:1px solid var(--line);border-radius:11px;padding:15px 17px;margin-bottom:11px;
+  transition:.15s;cursor:pointer;background:#fff;position:relative;
+}
+.hl:hover{border-color:var(--brand);box-shadow:var(--shadow);transform:translateX(2px)}
+.hl-t{font-size:14.5px;line-height:1.85;color:var(--ink)}
+.hl-m{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11.5px;color:var(--ink-3);flex-wrap:wrap}
+.hl-ch{padding:2px 8px;background:var(--brand-soft);color:var(--brand);border-radius:5px;font-weight:500}
+.hl-hot{display:flex;align-items:center;gap:5px;margin-left:auto;color:var(--gold);font-weight:600}
+.hl-rank{
+  position:absolute;top:-1px;left:-1px;width:26px;height:26px;background:var(--gold);color:#fff;
+  border-radius:10px 0 11px 0;display:grid;place-items:center;font-size:11px;font-weight:700;
+}
+.hl-rank.gray{background:var(--gray)}
+
+/* 想法卡片 */
+.th{border:1px solid var(--line);border-radius:11px;padding:15px 17px;margin-bottom:11px;background:#fff}
+.th-q{
+  font-size:13.5px;color:var(--ink-3);line-height:1.75;padding:9px 13px;background:var(--bg);
+  border-left:2px solid var(--gray);border-radius:0 7px 7px 0;margin-bottom:11px;
+}
+.th-c{font-size:14.5px;color:var(--ink);line-height:1.85}
+.th-m{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:11.5px;color:var(--ink-3)}
+
+/* 章节目录 */
+.chs{list-style:none}
+.chs li{
+  display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;
+  font-size:14px;transition:.15s;cursor:pointer;
+}
+.chs li:hover{background:var(--brand-soft)}
+.chs li.l1{font-weight:600;color:var(--brand);margin-top:9px;font-size:13.5px}
+.chs li.l2{padding-left:30px}
+.chs .ci{
+  width:24px;height:24px;border-radius:6px;background:var(--line-2);color:var(--ink-3);
+  display:grid;place-items:center;font-size:11px;font-weight:600;flex-shrink:0;font-variant-numeric:tabular-nums;
+}
+.chs li.l1 .ci{background:var(--brand);color:#fff}
+.chs .cn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chs .cw{font-size:11.5px;color:var(--ink-3);flex-shrink:0;font-variant-numeric:tabular-nums}
+
+.empty{text-align:center;padding:56px 20px;color:var(--ink-3);font-size:14px}
+.empty .e1{font-size:40px;margin-bottom:10px;opacity:.5}
+
+footer{text-align:center;margin-top:40px;font-size:12px;color:var(--ink-3);line-height:2}
+
+@media(max-width:720px){
+  .wrap{padding:0 15px}
+  .hero .wrap{gap:18px;padding:22px 15px}
+  .cover{width:104px}
+  .hinfo h1{font-size:22px}
+  .stats{grid-template-columns:repeat(3,1fr);gap:9px}
+  .tabs{position:static}
+  .panel{padding:19px 17px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a href="../我的书架.html">← 返回我的书架</a>
+    <span class="sp"></span>
+    <span class="t" id="tbtime"></span>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="cover">
+      <img id="cov" src="" alt="封面" onerror="document.getElementById('covfb').style.display='grid';this.style.display='none'">
+      <div class="fb" id="covfb"></div>
+    </div>
+    <div class="hinfo">
+      <h1 id="btitle">—</h1>
+      <div class="meta" id="bmeta"></div>
+      <div class="rating" id="brating"></div>
+      <div class="intro" id="bintro"></div>
+      <div class="prog-box">
+        <div class="prog-top">
+          <span>我的阅读进度</span>
+          <span><b id="pval">0%</b> · <span id="pdur"></span></span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0"></div></div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-p" id="bopen" target="_blank" rel="noopener"
+           title="已登录 → 显示我的书架；未登录 → 扫码登录">📚 打开网页版书架</a>
+        <a class="btn btn-s" id="bdetail" target="_blank" rel="noopener">🔗 本书详情页</a>
+        <a class="btn btn-s" href="../我的书架.html">🗂 我的书架</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stats" id="stats"></div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="pane on" id="pane-notes">
+    <div class="panel"><h3>我的读书笔记 <span class="hint">整理自 个人笔记/</span></h3>
+      <div class="notes" id="notesbody"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-best">
+    <div class="panel"><h3>全书热门划线 <span class="hint">按划线人数排序 · 点击定位到原文</span></h3>
+      <div id="bestbody"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-mine">
+    <div class="panel"><h3>我的划线 <span class="hint">按章节顺序 · 点击定位到原文</span></h3>
+      <div id="minebody"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-thoughts">
+    <div class="panel"><h3>我的想法与点评</h3>
+      <div id="thoughtsbody"></div>
+    </div>
+  </div>
+
+  <div class="pane" id="pane-chapters">
+    <div class="panel"><h3>章节目录 <span class="hint">点击跳转章节</span></h3>
+      <ul class="chs" id="chsbody"></ul>
+    </div>
+  </div>
+
+  <footer>
+    数据来源：微信读书 · 书籍详情 / 章节 / 划线接口<br>
+    <span id="foot"></span>
+  </footer>
+</div>
+
+<script>
+const D = /*__BOOK__*/;
+const B = D.book, R = D.reading, C = D.counts;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function fmtCount(n){
+  n = n||0;
+  return n>=10000 ? (n/10000).toFixed(1)+' 万人' : n+' 人';
+}
+function fmtWord(n){
+  n = n||0;
+  return n>=10000 ? (n/10000).toFixed(1)+' 万字' : n+' 字';
+}
+
+/* ---------- 头部 ---------- */
+function renderHero(){
+  document.title = B.title + ' · 读书整理';
+  $('cov').src = B.cover;
+  $('covfb').textContent = B.title;
+  $('btitle').textContent = B.title;
+
+  const m = [];
+  if (B.author) m.push('作者 ' + B.author);
+  if (B.translator) m.push('译者 ' + B.translator);
+  if (B.publisher) m.push(B.publisher);
+  if (B.publishTime) m.push(B.publishTime);
+  $('bmeta').innerHTML = m.map(esc).join('<span></span>');
+
+  let rt = '';
+  if (B.rating) rt = `<span class="rscore">${B.rating}</span><span class="rpeople">${fmtCount(B.ratingCount)}评价</span>`;
+  if (B.category) rt += `<span class="hl-ch" style="margin-left:4px">${esc(B.category)}</span>`;
+  if (B.wordCount) rt += `<span class="rpeople">约 ${fmtWord(B.wordCount)}</span>`;
+  $('brating').innerHTML = rt;
+
+  $('bintro').textContent = B.intro || '（暂无简介）';
+  /* 网页版书架：已登录 => 我的书架；未登录 => 扫码登录 */
+  const WR_SHELF = 'https://weread.qq.com/web/shelf';
+  $('bopen').href = WR_SHELF;
+  $('bdetail').href = B.webUrl || WR_SHELF;
+  $('pval').textContent = R.progress + '%';
+  $('pfill').style.width = R.progress + '%';
+  $('pdur').textContent = R.readingTimeText + (R.lastRead ? ' · 最近 ' + R.lastRead : '');
+  $('tbtime').textContent = '数据更新 ' + D.generatedAt;
+  $('foot').textContent = `${B.title} · 共 ${C.chapters} 章 · 热门划线 ${C.best} 条 · 我的划线 ${C.mine} 条 · 我的想法 ${C.thoughts} 条`;
+}
+
+/* ---------- 统计 ---------- */
+function renderStats(){
+  const s = [
+    ['章节', C.chapters, ''],
+    ['热门划线', C.best, ''],
+    ['我的划线', C.mine, ''],
+    ['我的想法', C.thoughts, ''],
+    ['阅读时长', R.readingTimeText.replace(' 小时','h').replace(' 分钟','m'), ''],
+  ];
+  $('stats').innerHTML = s.map(([k,v]) =>
+    `<div class="stat"><div class="v">${esc(v)}</div><div class="k">${k}</div></div>`).join('');
+}
+
+/* ---------- 笔记 ---------- */
+function renderNotes(){
+  $('notesbody').innerHTML = D.notesHtml ||
+    '<div class="empty"><div class="e1">📝</div>还没有整理这本书的笔记</div>';
+}
+
+/* ---------- 热门划线 ---------- */
+function renderBest(){
+  const box = $('bestbody');
+  if (!D.best.length){
+    box.innerHTML = '<div class="empty"><div class="e1">✨</div>暂无热门划线</div>';
+    return;
+  }
+  box.innerHTML = D.best.map((h,i)=>`
+    <div class="hl" data-u="${esc(h.url)}">
+      ${i<3?`<div class="hl-rank">${i+1}</div>`:''}
+      <div class="hl-t"${i<3?' style="padding-left:14px"':''}>${esc(h.text)}</div>
+      <div class="hl-m">
+        ${h.ch?`<span class="hl-ch">${esc(h.ch)}</span>`:''}
+        <span class="hl-hot">🔥 ${fmtCount(h.count)}划线</span>
+      </div>
+    </div>`).join('');
+  box.querySelectorAll('.hl').forEach(el=>{
+    el.onclick = ()=>{ if(el.dataset.u) location.href = el.dataset.u; };
+  });
+}
+
+/* ---------- 我的划线 ---------- */
+function renderMine(){
+  const box = $('minebody');
+  if (!D.mine.length){
+    box.innerHTML = '<div class="empty"><div class="e1">🖍</div>这本书还没有你的划线</div>';
+    return;
+  }
+  box.innerHTML = D.mine.map(h=>`
+    <div class="hl" data-u="${esc(h.url)}">
+      <div class="hl-t">${esc(h.text)}</div>
+      <div class="hl-m">
+        ${h.ch?`<span class="hl-ch">${esc(h.ch)}</span>`:''}
+        ${h.date?`<span>${esc(h.date)}</span>`:''}
+      </div>
+    </div>`).join('');
+  box.querySelectorAll('.hl').forEach(el=>{
+    el.onclick = ()=>{ if(el.dataset.u) location.href = el.dataset.u; };
+  });
+}
+
+/* ---------- 我的想法 ---------- */
+function renderThoughts(){
+  const box = $('thoughtsbody');
+  if (!D.thoughts.length){
+    box.innerHTML = '<div class="empty"><div class="e1">💭</div>这本书还没有你的想法</div>';
+    return;
+  }
+  box.innerHTML = D.thoughts.map(t=>`
+    <div class="th" data-u="${esc(t.url)}">
+      ${t.abstract?`<div class="th-q">${esc(t.abstract)}</div>`:''}
+      <div class="th-c">${esc(t.content)}</div>
+      <div class="th-m">
+        ${t.ch?`<span class="hl-ch">${esc(t.ch)}</span>`:''}
+        ${t.date?`<span>${esc(t.date)}</span>`:''}
+      </div>
+    </div>`).join('');
+  box.querySelectorAll('.th').forEach(el=>{
+    el.onclick = ()=>{ if(el.dataset.u) location.href = el.dataset.u; };
+  });
+}
+
+/* ---------- 章节 ---------- */
+function renderChapters(){
+  $('chsbody').innerHTML = D.chapters.map(c=>`
+    <li class="l${c.level}" data-u="${esc(c.url)}">
+      <span class="ci">${c.idx}</span>
+      <span class="cn">${esc(c.title)}</span>
+      <span class="cw">${c.wc?fmtWord(c.wc):''}</span>
+    </li>`).join('');
+  $('chsbody').querySelectorAll('li').forEach(el=>{
+    el.onclick = ()=>{ if(el.dataset.u) location.href = el.dataset.u; };
+  });
+}
+
+/* ---------- Tabs ---------- */
+function renderTabs(){
+  const defs = [
+    ['notes','📝 我的笔记',''],
+    ['best','🔥 热门划线',C.best],
+    ['mine','🖍 我的划线',C.mine],
+    ['thoughts','💭 我的想法',C.thoughts],
+    ['chapters','📑 章节目录',C.chapters],
+  ];
+  $('tabs').innerHTML = defs.map(([k,n,c],i)=>
+    `<button class="tab ${i===0?'on':''}" data-k="${k}">${n}${c!==''?`<span class="n">${c}</span>`:''}</button>`).join('');
+  $('tabs').querySelectorAll('.tab').forEach(el=>{
+    el.onclick = ()=>{
+      $('tabs').querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+      el.classList.add('on');
+      document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+      $('pane-'+el.dataset.k).classList.add('on');
+    };
+  });
+}
+
+renderHero();
+renderStats();
+renderTabs();
+renderNotes();
+renderBest();
+renderMine();
+renderThoughts();
+renderChapters();
+</script>
+</body>
+</html>
