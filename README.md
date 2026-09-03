@@ -62,10 +62,6 @@ Agent 会自动识别意图并引导完成，包括首次使用时获取 API Key
 
 ## Star History
 
-<a href="https://www.star-history.com/?repos=gaoxi-hub%2Fxixi-skills&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&theme=dark&legend=top-left&sealed_token=JmM8QAxIP4M8BdGh8nTKkxmYqA1lsBoSiitAwYS0KFQU_DYdpv2j3wYvn7lEAPDjtqNW" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=JmM8QAxIP4M8BdGh8nTKkxmYqA1lsBoSiitAwYS0KFQU_DYdpv2j3wYvn7lEAPDjtqNW" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=JmM8QAxIP4M8BdGh8nTKkxmYqA1lsBoSiitAwYS0KFQU_DYdpv2j3wYvn7lEAPDjtqNW" />
- </picture>
-</a>
+## Star History
+
+[![Star History Chart](https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=M89-ceGl72Nocm7ZP0lWqN6_8synkVxiqQQO6qAh1ySvBBkV8wFd14fqbVuHQaRV68Kp)](https://www.star-history.com/?repos=gaoxi-hub%2Fxixi-skills&type=date&legend=top-left)
