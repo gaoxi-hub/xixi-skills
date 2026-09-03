@@ -59,9 +59,12 @@ Agent 会自动识别意图并引导完成，包括首次使用时获取 API Key
 - 微信读书账号
 - 微信读书 API Key（首次使用时 agent 会引导获取）
 
-
 ## Star History
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=M89-ceGl72Nocm7ZP0lWqN6_8synkVxiqQQO6qAh1ySvBBkV8wFd14fqbVuHQaRV68Kp)](https://www.star-history.com/?repos=gaoxi-hub%2Fxixi-skills&type=date&legend=top-left)
+<a href="https://www.star-history.com/?repos=gaoxi-hub%2Fxixi-skills&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&theme=dark&legend=top-left&sealed_token=b6vo5J3P0e-RUTMNFE3ZOIU7YY9lMol0uN64ihJHZjBq19vsVzjKq6rhGcSNjtPs7mEcT6eyikC0dAg_xJIAtmi1MCC__mAwqPqDJccaGzxssC3WiGzrXp7XomTSW20mc3TmjTGyFyLi_0pTCEodV4856I05ntnI1orVU8GYL4dkW8pJIFYLLcs_EoaY" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=b6vo5J3P0e-RUTMNFE3ZOIU7YY9lMol0uN64ihJHZjBq19vsVzjKq6rhGcSNjtPs7mEcT6eyikC0dAg_xJIAtmi1MCC__mAwqPqDJccaGzxssC3WiGzrXp7XomTSW20mc3TmjTGyFyLi_0pTCEodV4856I05ntnI1orVU8GYL4dkW8pJIFYLLcs_EoaY" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=b6vo5J3P0e-RUTMNFE3ZOIU7YY9lMol0uN64ihJHZjBq19vsVzjKq6rhGcSNjtPs7mEcT6eyikC0dAg_xJIAtmi1MCC__mAwqPqDJccaGzxssC3WiGzrXp7XomTSW20mc3TmjTGyFyLi_0pTCEodV4856I05ntnI1orVU8GYL4dkW8pJIFYLLcs_EoaY" />
+ </picture>
+</a>
