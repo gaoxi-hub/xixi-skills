@@ -1,242 +1,71 @@
 # xixi-weread-skill
 
-把微信读书账号里的书架和笔记，落成一份可以直接用浏览器打开的本地阅读库。
-
-不依赖 Node/前端框架，也不需要装第三方 Python 包 —— 两个脚本、两个 HTML 模板，
-生成的是纯静态页面，可以直接丢进 Obsidian 库、Git 仓库，或者随便一个文件夹里打开看。
-
-> 📸 **书架首页整体截图**
-![img.png](images/shelf.png)
-
-## 这是什么
-
-微信读书的书架和笔记数据都锁在 App 和小程序里，不好搬到 Obsidian 之类的笔记库里长期归档。
-这个项目提供两条命令，把账号里的数据转成本地 HTML 页面：
-
-| 命令 | 做什么 | 产出 |
-|------|--------|------|
-| `init` | 先搭好笔记库目录 + 骨架书架页（不需要 API Key），再让你选「现在同步」还是「稍后同步」 | `我的书架.html` |
-| `read <书名>` | 整理某一本书的章节 / 热门划线 / 我的划线 / 我的想法 / 个人笔记 | `书籍整理/《书名》.html` |
-
-书架页里每本书有一个「📝 笔记」入口，点进去就是那本书的整理页 —— 两个页面是互相链接的，
-所以哪怕只是当成一个静态网站放在 GitHub Pages 上，体验也是完整的。
+把微信读书的书架和笔记整理成本地 HTML 阅读库，安装为 Agent Skill 后直接在对话里使用。
 
 ## 效果预览
 
-**书架页**：网格状的书籍卡片，带封面、进度百分比、阅读状态标签，右上角有整体统计环形图（或数字）。
+**书架页**
 
-> 📸 **书架卡片细节截图**
-![img.png](images/card-detail.png)
+![书架页](images/shelf.png)
 
+**书籍整理页**
 
-
-**书籍整理页**：书名、作者、简介，然后是章节目录、热门划线（带热度）、我的划线、我的想法，
-最后是个人笔记（如果 `个人笔记/` 里有对应的 md 文件会被渲染进来）。
-
-> 📸 ** 书籍整理页截图**
-![img.png](images/book-basic.png)
-
-![img.png](images/my-notes.png)
-
-## 特点
-
-- **零第三方依赖**：只用 Python 标准库。目标机器的系统 Python 常是 externally-managed，
-  `pip install` 会失败，所以刻意没有引入任何包。
-- **纯静态输出**：生成的 HTML 内嵌了数据和渲染逻辑，双击打开就能看，不需要起服务。
-- **书架页 ↔ 整理页自动互链**：整理某本书之后，书架页会自动重新生成并挂上笔记入口。
-- **个人笔记 markdown 子集渲染**：支持标题、列表、表格、加粗、行内代码、折叠块，
-  写在 Obsidian 里的读书笔记可以直接被拼进整理页。
-- **退出码即交互协议**：脚本设计给 AI Agent（如 Kiro）调用，缺 Key / 命中多本书 / 找不到书
-  都用固定退出码表达，方便自动化流程判断下一步。
-
-## 环境要求
-
-- Python 3.8+（用系统自带的 `python3` 即可，无需虚拟环境）
-- 一个有效的微信读书账号
-- 微信读书 API Key（首次使用 `init` 时会引导获取）
+![书籍整理页](images/book-basic.png)
 
 ## 安装
 
-```bash
-git clone https://github.com/<你的用户名>/xixi-weread-skill.git
-cd xixi-weread-skill
-```
+**方式一：npx（推荐）**
 
-如果作为 [Kiro](https://kiro.dev) 的 Agent Skill 使用，把整个目录放进
-`~/.kiro/skills/xixi-weread-skill/` 即可被自动识别（详见 `SKILL.md`）。不用 Kiro、
-直接跑脚本也完全可以，放哪个目录都行，下面的命令示例统一用 `$SK` 表示 `scripts/` 目录的路径，
-换成你实际克隆到的位置即可。
-
-## 快速开始
-
-先把 `$SK` 设成你克隆下来的 `scripts/` 目录，比如：
+支持 Kiro、Claude Code、Codex、Cursor 等 70+ 个 agent，自动安装到已检测到的 agent：
 
 ```bash
-SK=~/xixi-weread-skill/scripts   # 换成你自己 clone 的路径
+npx skills add gaoxi-hub/xixi-skills
 ```
 
-（如果是通过 Kiro 装的，通常是 `SK=~/.kiro/skills/xixi-weread-skill/scripts`。）
-
-### 1. 初始化笔记库
-
-在你想存放笔记库的目录下运行：
+**方式二：手动**
 
 ```bash
-cd ~/Desktop/我的读书笔记   # 换成你自己的目录，可以是空目录
-python3 $SK/init_shelf.py
+git clone https://github.com/gaoxi-hub/xixi-skills.git
 ```
 
-这一步分两阶段：
+把 `xixi-weread-skill/` 目录放到对应 agent 的 skills 目录下：
 
-**先搭架子。** 不需要 API Key，不发任何网络请求。会补齐 `个人笔记/`、`书籍整理/`、
-`.weread-cache/` 子目录，并生成一份骨架版 `我的书架.html`——目录结构已经就位，
-但书架卡片是空的，页面上会有一条「还没同步」的提示。
+| Agent | Skills 目录 |
+|-------|-------------|
+| Kiro | `~/.kiro/skills/` |
+| Workbuddy | `~/.workbuddy/skills/` |
+| 其他支持 SKILL.md 的 agent | 参考对应 agent 的文档 |
 
-**再问要不要同步。** 架子搭好后，脚本会打印两个选项然后停下来（退出码 6）：
+## 使用
 
-```
-🤔 骨架已经搭好了，现在要同步真实书架数据吗？
+安装后直接在对话里说就行，不需要手动跑命令：
 
-   现在同步：会拉取账号里的全部书籍、阅读进度、分类，耗时约一两分钟，
-             首次同步还需要一个微信读书 API Key。
-   稍后同步：骨架页已经能打开看目录结构了，之后随时可以回来同步。
+- "帮我初始化微信读书笔记库"
+- "同步一下我的书架"
+- "整理一下《纳瓦尔宝典》的笔记"
 
-   现在同步 → python3 $SK/init_shelf.py --sync
-   稍后同步 → python3 $SK/init_shelf.py --later
-```
+Agent 会自动识别意图并引导完成，包括首次使用时获取 API Key。
 
-**选「现在同步」**：
+## 两条命令
 
-```bash
-python3 $SK/init_shelf.py --sync
-```
+| 命令 | 做什么 | 产出 |
+|------|--------|------|
+| `init` | 建好笔记库目录，同步书架数据 | `我的书架.html` |
+| `read <书名>` | 整理某本书的章节、划线、想法 | `书籍整理/《书名》.html` |
 
-如果本地没有可用的 API Key，脚本会打印引导：
+## 依赖
 
-```
-🔑 还没有可用的微信读书 API Key。请按两步拿到它：
+- `python3`（系统自带即可，无需安装第三方包）
+- 微信读书账号
+- 微信读书 API Key（首次使用时 agent 会引导获取）
 
-  1. 用浏览器打开   https://weread.qq.com/r/weread-skills
-  2. 用微信扫码登录，页面「快速配置 → 2 获取 API Key」处复制那串 wrk- 开头的字符
-```
 
-拿到 Key 之后：
+## Star History
 
-```bash
-python3 $SK/init_shelf.py --api-key wrk-xxxxxxxx
-```
-
-Key 会保存到 `~/.config/weread/api_key`（权限 600），下次运行不用再传，效果等同于 `--sync`。
-
-**选「稍后同步」**：
-
-```bash
-python3 $SK/init_shelf.py --later
-```
-
-骨架页留着不动，之后随时可以回来跑 `python3 $SK/init_shelf.py --sync` 补上真实数据。
-
-用浏览器直接打开生成的 `我的书架.html` 就能看到当前状态（骨架或已同步的书架页）。
-
-### 2. 整理某一本书
-
-同样在笔记库目录下运行（不用 cd 进 `scripts/`）：
-
-```bash
-python3 $SK/build_book.py 纳瓦尔
-```
-
-用关键词模糊匹配书架里的书名，命中一本就直接生成；命中多本会列出候选，
-需要加 `--pick N` 指定具体是第几本。生成的整理页放在 `书籍整理/《书名》.html`，
-同时书架页会自动重新生成、挂上这本书的「📝 笔记」入口。
-
-### 常用参数
-
-| 参数 | 适用命令 | 作用 |
-|------|----------|------|
-| `--check` | `init_shelf.py` | 只探测密钥和库位置，不写任何文件 |
-| `--sync` | `init_shelf.py` | 立即同步真实书架数据（首次同步需要 API Key） |
-| `--later` | `init_shelf.py` | 明确选择稍后同步，只留骨架页 |
-| `--vault <路径>` | 两者 | 指定笔记库目录（默认从当前目录向上查找） |
-| `--no-refresh` | `init_shelf.py` | 已同步过的库，复用本地缓存只重新渲染页面（改完模板后用它，几秒就好） |
-| `--refresh` | `build_book.py` | 重新拉一次书架（书架有变动时用） |
-| `--pick N` | `build_book.py` | 关键词命中多本书时，指定第几个候选 |
-
-## 目录结构
-
-```
-<笔记库根>/
-├── Agent.md              目录规范说明（用户可自行维护）
-├── 我的书架.html          书架同步页（init 生成）
-├── 个人笔记/              手写的读书笔记 md，命名「书籍名称-xxx.md」
-├── 书籍整理/              每本书的整理页，命名「《书籍名称》.html」（read 生成）
-└── .weread-cache/        书架与进度缓存，无需手动管理
-```
-
-项目自身的目录：
-
-```
-xixi-weread-skill/
-├── SKILL.md                     Agent Skill 定义（供 Kiro 等工具识别）
-├── scripts/
-│   ├── weread.py                API 调用、口径处理、公共工具函数
-│   ├── init_shelf.py            init 命令
-│   └── build_book.py            read 命令
-├── assets/
-│   ├── shelf_template.html      书架页模板
-│   └── book_template.html       整理页模板
-└── references/
-    ├── api-cheatsheet.md        接口速查、口径陷阱
-    └── vault-layout.md          目录规范、渲染规则
-```
-
-## 个人笔记支持的 Markdown 语法
-
-`个人笔记/` 里的 md 文件会被拼进对应的整理页,只支持下面这个子集：
-
-| 写法 | 渲染成 |
-|------|--------|
-| `# 标题` / `## 标题` | 三级标题 |
-| `### 标题` 及更深 | 四级标题 |
-| 顶格 `1. **短语**`（整行只有这个加粗短语） | 四级标题 |
-| 顶格 `1. **短语**：后面还有内容` | 有序列表项 |
-| 缩进的 `1. 文本` | 有序列表项 |
-| `- 文本` / `* 文本` | 无序列表项 |
-| `\| a \| b \|` + 分隔行 | 表格 |
-| ` ```markdown ` 围栏 | 可折叠块 |
-| 其他语言的代码围栏 | 代码块 |
-| `**加粗**` / `` `代码` `` | 加粗 / 行内代码 |
-
-图片、链接、引用块、多级嵌套列表暂不支持，会退化成普通段落。完整设计细节见
-[`references/vault-layout.md`](references/vault-layout.md)。
-
-## 退出码说明
-
-脚本设计给自动化流程（比如 AI Agent）调用，遇到需要人参与的情况会用固定退出码，
-而不是直接报错退出：
-
-| 退出码 | 含义 | 建议的下一步 |
-|--------|------|--------------|
-| `3` | 没有可用的 API Key | 按提示获取 Key，用 `--api-key` 重新运行 |
-| `4` | 关键词命中多本书 | 从列出的候选里选一个，加 `--pick N` 重新运行 |
-| `5` | 书架里没有这本书 | 换个关键词，或加 `--refresh` 重新拉书架 |
-| `6` | 骨架已生成，等待选择「现在同步」还是「稍后同步」 | 按选择加 `--sync` 或 `--later` 重新运行 |
-
-## 常见问题
-
-**书架卡片点进去打开的是 App 还是浏览器？**
-是浏览器（`https://weread.qq.com/...`）。书内的划线跳转用的是 App 协议 `weread://`，
-但书架和详情页的入口统一走浏览器链接,方便在没装 App 的设备上也能打开。
-
-**改了模板样式要怎么让已有页面生效？**
-改 `assets/shelf_template.html` 或 `assets/book_template.html` 之后，
-对书架页跑 `python3 $SK/init_shelf.py --no-refresh`，对某本整理页重新跑一次
-`python3 $SK/build_book.py <书名>` 即可。
-
-**API Key 存在哪里，安全吗？**
-存在本机的 `~/.config/weread/api_key`，文件权限为 600（仅当前用户可读写）。
-Key 只在本机使用，不会被提交进任何生成的文件或页面。
-
-**支持搜书、阅读时长统计、书评这些功能吗？**
-不支持,这个项目只固化了 `init` / `read` 这两条日常流程。更开放式的查询建议配合官方的
-[weread-skills](https://weread.qq.com/r/weread-skills)（`npx skills add Tencent/WeChatReading -g`）使用。
+<a href="https://www.star-history.com/?repos=gaoxi-hub%2Fxixi-skills&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&theme=dark&legend=top-left&sealed_token=JmM8QAxIP4M8BdGh8nTKkxmYqA1lsBoSiitAwYS0KFQU_DYdpv2j3wYvn7lEAPDjtqNW" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=JmM8QAxIP4M8BdGh8nTKkxmYqA1lsBoSiitAwYS0KFQU_DYdpv2j3wYvn7lEAPDjtqNW" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=gaoxi-hub/xixi-skills&type=date&legend=top-left&sealed_token=JmM8QAxIP4M8BdGh8nTKkxmYqA1lsBoSiitAwYS0KFQU_DYdpv2j3wYvn7lEAPDjtqNW" />
+ </picture>
+</a>
