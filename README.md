@@ -36,6 +36,12 @@ git clone https://github.com/gaoxi-hub/xixi-skills.git
 | Workbuddy | `~/.workbuddy/skills/` |
 | 其他支持 SKILL.md 的 agent | 参考对应 agent 的文档 |
 
+**在 WorkBuddy 中安装**
+
+把 `xixi-weread-skill/` 目录放入 `~/.workbuddy/skills/`，即可在 WorkBuddy 对话中直接调用；也可在 WorkBuddy 的技能市场搜索并一键安装：
+
+![WorkBuddy 安装](images/workbuddy-skill.png)
+
 ## 使用
 
 安装后直接在对话里说就行，不需要手动跑命令：
